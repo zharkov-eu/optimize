@@ -458,7 +458,7 @@ class PavedDrive(Enum):
     DirtOrGravel = "N"
 
 
-class PoolQC:
+class PoolQC(Enum):
     """Pool quality"""
     Excellent = "Ex"
     Good = "Gd"

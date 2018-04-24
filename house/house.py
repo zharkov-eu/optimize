@@ -119,8 +119,36 @@ class House(object):
         setattr(self, "_OverallCond", int(value))
 
     @property
+    def FirstFlrSF(self):
+        """First Floor square feet"""
+        return getattr(self, '_FirstFlrSF')
+
+    @FirstFlrSF.setter
+    def FirstFlrSF(self, value):
+        setattr(self, "_FirstFlrSF", int(value))
+
+    @property
+    def SecondFlrSF(self):
+        """Second floor square feet"""
+        return getattr(self, '_SecondFlrSF')
+
+    @SecondFlrSF.setter
+    def SecondFlrSF(self, value):
+        setattr(self, "_SecondFlrSF", int(value))
+
+
+    @property
+    def LowQualFinSF(self):
+        """Low quality finished square feet (all floors)"""
+        return getattr(self, '_LowQualFinSF')
+
+    @LowQualFinSF.setter
+    def LowQualFinSF(self, value):
+        setattr(self, "_LowQualFinSF", int(value))
+
+    @property
     def GarageType(self):
-        """Rates the overall condition of the house"""
+        """Garage location"""
         return getattr(self, '_GarageType')
 
     @GarageType.setter
@@ -128,6 +156,17 @@ class House(object):
         if not self.in_enum(value, GarageType):
             raise ValueError("%s is not in GarageType enum", value)
         setattr(self, "_GarageType", value)
+
+    @property
+    def PoolQC(self):
+        """Pool quality"""
+        return getattr(self, '_PoolQC')
+
+    @PoolQC.setter
+    def PoolQC(self, value):
+        if not self.in_enum(value, PoolQC):
+            raise ValueError("%s is not in PoolQC enum", value)
+        setattr(self, "_PoolQC", value)
 
     @property
     def SalePrice(self):
@@ -168,6 +207,16 @@ class House(object):
             self.OverallQual = params.get("OverallQual")
         if "OverallCond" in params:
             self.OverallCond = params.get("OverallCond")
+        if "1stFlrSF" in params:
+            self.FirstFlrSF = params.get("1stFlrSF")
+        if "2ndFlrSF" in params:
+            self.SecondFlrSF = params.get("2ndFlrSF")
+        if "LowQualFinSF" in params:
+            self.LowQualFinSF = params.get("LowQualFinSF")
+        if "GarageType" in params:
+            self.GarageType = params.get("GarageType")
+        if "PoolQC" in params:
+            self.PoolQC = params.get("PoolQC")
         if "SalePrice" in params:
             self.SalePrice = params.get("SalePrice")
 
