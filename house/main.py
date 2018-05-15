@@ -1,7 +1,7 @@
 import os
 import csv
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import differential_evolution, minimize
 from scipy.interpolate import Rbf
 import matplotlib.pylab as plt
 from mpl_toolkits import mplot3d
@@ -40,7 +40,8 @@ salePrice = map(lambda house: house.SalePrice, housesFiltered)
 coordinatesMap = {}
 
 for idx, price in enumerate(salePrice):
-    coordinate = (lotArea[idx], overallCond[idx], overallQual[idx], firstFlrSF[idx], secondFlrSF[idx], lowQualFinSF[idx])
+    coordinate = (
+        lotArea[idx], overallCond[idx], overallQual[idx], firstFlrSF[idx], secondFlrSF[idx], lowQualFinSF[idx])
     if coordinatesMap.has_key((coordinate)):
         coordinatesMap[coordinate] = (price + coordinatesMap.get(coordinate)) / 2
     coordinatesMap[coordinate] = price
@@ -70,9 +71,42 @@ result = minimize(
     initial, method="SLSQP", bounds=bounds
 )
 
+stochasticResult = differential_evolution(
+    lambda x: interpolated(x[0], round(x[1]), round(x[2]), x[3], x[4], x[5]).item(),
+    bounds
+)
+
+# lotAreaSpace = np.linspace(1, 1000000, 10000)
+# overallCondSpace = np.linspace(1, 10, 10000)
+# overallQualSpace = np.linspace(1, 10, 10000)
+# firstFlrSFSpace = np.linspace(1, 2000, 10000)
+# secondFlrSFSpace = np.linspace(1, 2000, 10000)
+# lowQualFinSFSpace = np.linspace(1, 1000, 10000)
+
+# lotAreaSpace = 1000000 * np.random.random_sample(10000) + 1
+# overallCondSpace = 10 * np.random.random_sample(10000) + 1
+# overallQualSpace = 10 * np.random.random_sample(10000) + 1
+# firstFlrSFSpace = 2000 * np.random.random_sample(10000) + 1
+# secondFlrSFSpace = 2000 * np.random.random_sample(10000) + 1
+# lowQualFinSFSpace = 1000 * np.random.random_sample(10000) + 1
+#
+# func = np.vectorize(lambda x: interpolated(
+#     np.take(lotAreaSpace, x - 1),
+#     np.take(overallCondSpace, x - 1),
+#     np.take(overallQualSpace, x - 1),
+#     np.take(firstFlrSFSpace, x - 1),
+#     np.take(secondFlrSFSpace, x - 1),
+#     np.take(lowQualFinSFSpace, x - 1)
+# ))
+#
+# plt.plot(
+#     np.linspace(1, 100000, 10000),
+#     np.array(func(np.linspace(1, 100000, 10000)))
+# )
+
 # fig = plt.figure()
 # ax = plt.axes(projection="3d")
 # ax.view_init(30, 35)
 # ax.plot3D(overallCond, overallQual, salePrice, 'ro')
 
-# plt.plot(lotAreaToSalePrice[0], lotAreaToSalePrice[1], lotAreaToSalePrice[2], 'ro')
+# plt.plot(lotAreaToSalePrice[], lotAreaToSalePrice[1], lotAreaToSalePrice[2], 'ro')
