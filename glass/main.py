@@ -3,8 +3,8 @@
 import os
 import csv
 import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.decomposition import TruncatedSVD
+from sklearn.cluster import AffinityPropagation, DBSCAN, KMeans
+from sklearn.decomposition import FactorAnalysis, PCA, TruncatedSVD
 import matplotlib.pylab as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -66,25 +66,75 @@ for glass in glasses:
     kmeansCluster[group].append(glass.get('id'))
     kmeansIdToType[glass.get('id')] = group
 
+# Кластеризация (AffinityPropagation)
+affinity = AffinityPropagation().fit(X)
+affinityCluster = {}
+affinityIdToType = {}
+for glass in glasses:
+    group = affinity.predict([linearize_glass(glass), linearize_glass(glass)])[0]
+    if affinityCluster.get(group) == None:
+        affinityCluster[group] = []
+    affinityCluster[group].append(glass.get('id'))
+    affinityIdToType[glass.get('id')] = group
+
+# Кластеризация (DBSCAN)
+dbscan = DBSCAN().fit(X)
+dbscanCluster = {}
+dbscanIdToType = {}
+
 # Сравнение количества элементов по кластерам
 print('Real:')
 print(map(lambda cluster: (cluster[0], len(cluster[1])), realCluster.items()))
 print('KMeans:')
 print(map(lambda cluster: (cluster[0] + 1, len(cluster[1])), kmeansCluster.items()))
+print('AffinityCluster:')
+print(map(lambda cluster: (cluster[0] + 1, len(cluster[1])), affinityCluster.items()))
+print('DBSCAN:')
+print(map(lambda cluster: (cluster[0] + 1, len(cluster[1])), kmeansCluster.items()))
 
 kmeansErrorCount = 0
 
-# Снижение размерности пространства
-X_reduced = TruncatedSVD(n_components=3).fit_transform(X)
+# Снижение размерности пространства: SVD
+# X_truncated = TruncatedSVD(n_components=3).fit_transform(X)
+
+# fig = plt.figure(figsize=(16, 8))
+
+# ax = fig.add_subplot(121, projection='3d')
+# ax.scatter(X_truncated[:, 0], X_truncated[:, 1], X_truncated[:, 2], c=map(lambda idToType: idToType[1], realIdToType.items()))
+# ax.set_title("Real Clustering: Truncated SVD reduction (2d) of (9d) data")
+
+# ax = fig.add_subplot(122, projection='3d')
+# ax.scatter(X_truncated[:, 0], X_truncated[:, 1], X_truncated[:, 2], c=map(lambda idToType: idToType[1], kmeansIdToType.items()))
+# ax.set_title("KMeans Clustering: Truncated SVD reduction (2d) of (9d) data")
+
+# plt.show()
+
+# Снижение размерности пространства: Pricipal Component Analysis
+X_pca = PCA(n_components=3).fit_transform(X)
 
 fig = plt.figure(figsize=(16, 8))
 
 ax = fig.add_subplot(121, projection='3d')
-ax.scatter(X_reduced[:, 0], X_reduced[:, 1], X_reduced[:, 2], c=map(lambda idToType: idToType[1], realIdToType.items()))
-ax.set_title("Real Clustering: Truncated SVD reduction (2d) of (9d) data")
+ax.scatter(X_pca[:, 0], X_pca[:, 1], X_pca[:, 2], c=map(lambda idToType: idToType[1], realIdToType.items()))
+ax.set_title("Real Clustering: PCA reduction (2d) of (9d) data")
 
 ax = fig.add_subplot(122, projection='3d')
-ax.scatter(X_reduced[:, 0], X_reduced[:, 1], X_reduced[:, 2], c=map(lambda idToType: idToType[1], kmeansIdToType.items()))
-ax.set_title("KMeans Clustering: Truncated SVD reduction (2d) of (9d) data")
+ax.scatter(X_pca[:, 0], X_pca[:, 1], X_pca[:, 2], c=map(lambda idToType: idToType[1], kmeansIdToType.items()))
+ax.set_title("KMeans Clustering: PCA reduction (2d) of (9d) data")
 
 plt.show()
+
+# Снижение размерности пространства: Factor Analysis
+# X_factor = FactorAnalysis(n_components=3).fit_transform(X)
+
+# fig = plt.figure(figsize=(16, 8))
+
+# ax = fig.add_subplot(121, projection='3d')
+# ax.scatter(X_factor[:, 0], X_factor[:, 1], X_factor[:, 2], c=map(lambda idToType: idToType[1], realIdToType.items()))
+# ax.set_title("Real Clustering: Factor Analysis reduction (2d) of (9d) data")
+
+# ax = fig.add_subplot(122, projection='3d')
+# ax.scatter(X_factor[:, 0], X_factor[:, 1], X_factor[:, 2], c=map(lambda idToType: idToType[1], kmeansIdToType.items()))
+# ax.set_title("KMeans Clustering: Factor Analysis reduction (2d) of (9d) data")
+
+# plt.show()
