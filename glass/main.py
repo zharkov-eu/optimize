@@ -3,6 +3,7 @@
 import os
 import csv
 import numpy as np
+from sklearn.metrics import confusion_matrix
 from sklearn.cluster import AffinityPropagation, DBSCAN, KMeans
 from sklearn.decomposition import FactorAnalysis, PCA, TruncatedSVD
 import matplotlib.pylab as plt
@@ -70,14 +71,17 @@ X = np.array(map(lambda glass: linearize_glass(glass), glasses))
 # Кластеризация (K-средних)
 kmeans = KMeans(n_clusters=7).fit(X)
 kmeansCluster = cluster_info(kmeans, X)
+kmeansConfusion = confusion_matrix(map(lambda x: int(x), realIdToType.values()), kmeansCluster.get('predictIdToType').values())
 
 # Кластеризация (AffinityPropagation)
 affinity = AffinityPropagation().fit(X)
 affinityCluster = cluster_info(affinity, X)
+affinityConfusion = confusion_matrix(map(lambda x: int(x), realIdToType.values()), affinityCluster.get('predictIdToType').values())
 
 # Кластеризация (DBSCAN)
 dbscan = DBSCAN().fit(X)
 dbscanCluster = cluster_info(dbscan, X)
+dbscanConfusion = confusion_matrix(map(lambda x: int(x), realIdToType.values()), dbscanCluster.get('predictIdToType').values())
 
 # Сравнение количества элементов по кластерам
 print('Real:')
@@ -88,6 +92,14 @@ print('AffinityCluster:')
 print(map(lambda cluster: (cluster[0], len(cluster[1])), affinityCluster.get('predictCluster').items()))
 print('DBSCAN Cluster:')
 print(map(lambda cluster: (cluster[0], len(cluster[1])), dbscanCluster.get('predictCluster').items()))
+
+# Матрица ошибок
+print('KMeans:')
+print(kmeansConfusion)
+print('AffinityCluster:')
+print(affinityConfusion)
+print('DBSCAN Cluster:')
+print(dbscanConfusion)
 
 # Снижение размерности пространства:
 realClassification = map(lambda idToType: idToType[1], realIdToType.items())

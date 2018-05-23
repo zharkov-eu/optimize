@@ -3,6 +3,7 @@
 import os
 import csv
 import numpy as np
+from sklearn.metrics import confusion_matrix
 from sklearn.cluster import AffinityPropagation, DBSCAN, KMeans
 from sklearn.decomposition import FactorAnalysis, PCA, TruncatedSVD
 import matplotlib.pylab as plt
@@ -24,8 +25,8 @@ iris {
 """
 
 species_enum = {
-    'Iris-setosa': 0,
-    'Iris-versicolor': 1,
+    'Iris-versicolor': 0,
+    'Iris-setosa': 1,
     'Iris-virginica': 2
 }
 
@@ -40,8 +41,8 @@ def cluster_info(cluster, linearize_irises):
         group = predictions[idx]
         if predictCluster.get(group) == None:
             predictCluster[group] = []
-        predictCluster[group].append(iris.get('id'))
-        predictIdToType[iris.get('id')] = group
+        predictCluster[group].append(iris.get('Id'))
+        predictIdToType[iris.get('Id')] = group
     return {'predictCluster': predictCluster, 'predictIdToType': predictIdToType}
 
 with open(os.path.join('..', 'data', 'iris.csv'), 'rb') as csv_file:
@@ -71,14 +72,17 @@ X = np.array(map(lambda iris: linearize_iris(iris), irises))
 # Кластеризация (K-средних)
 kmeans = KMeans(n_clusters=3).fit(X)
 kmeansCluster = cluster_info(kmeans, X)
+kmeansConfusion = confusion_matrix(map(lambda x: int(x), realIdToType.values()), kmeansCluster.get('predictIdToType').values())
 
 # Кластеризация (AffinityPropagation)
 affinity = AffinityPropagation().fit(X)
 affinityCluster = cluster_info(affinity, X)
+affinityConfusion = confusion_matrix(map(lambda x: int(x), realIdToType.values()), affinityCluster.get('predictIdToType').values())
 
 # Кластеризация (DBSCAN)
 dbscan = DBSCAN().fit(X)
 dbscanCluster = cluster_info(dbscan, X)
+dbscanConfusion = confusion_matrix(map(lambda x: int(x), realIdToType.values()), dbscanCluster.get('predictIdToType').values())
 
 # Сравнение количества элементов по кластерам
 print('Real:')
